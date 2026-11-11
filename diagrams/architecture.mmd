@@ -16,9 +16,14 @@ classDiagram
 
     class logic_utils {
         <<module>>
+        +MAX_WIN_POINTS: int = 100
+        +POINTS_LOST_PER_ATTEMPT: int = 10
+        +MIN_WIN_POINTS: int = 10
+        +BASELINE_RANGE_SIZE: int = 100
         +get_range_for_difficulty(difficulty) tuple
         +is_float(raw) bool
         +parse_guess(raw) tuple
+        +validate_guess(guess, low, high, history) tuple
         +check_guess(guess, secret) tuple
         +update_score(current_score, outcome, attempt_number, range_size) int
     }
@@ -52,11 +57,12 @@ classDiagram
 
     class test_game_logic {
         <<tests>>
-        +test_winning_guess()
-        +test_guess_too_high()
-        +test_guess_too_low()
-        +test_parse_valid_number()
-        +test_parse_strips_surrounding_spaces()
+        +get_range_for_difficulty: 6 tests
+        +is_float: 2 tests
+        +check_guess: 3 tests
+        +parse_guess: 7 tests
+        +validate_guess: 8 tests
+        +update_score: 6 tests
     }
 
     class conftest {
@@ -77,7 +83,7 @@ classDiagram
     Streamlit *-- SessionState : persists across reruns
     test_game_logic ..> logic_utils : tests
     conftest ..> test_game_logic : observes test reports
-    conftest ..> test_results_txt : appends run summary
+    conftest ..> test_results_txt : writes latest run summary
 
     note for SessionState "status is playing, won or lost. DIFFICULTY is Easy, Normal or Hard"
     note for app "Debug panel shown only with query param debug=true"

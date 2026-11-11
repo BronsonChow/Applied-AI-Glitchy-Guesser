@@ -7,6 +7,7 @@ from logic_utils import (
     get_range_for_difficulty,
     parse_guess,
     update_score,
+    validate_guess,
 )
 
 #FIX: New game button
@@ -40,10 +41,8 @@ def submit_guess(attempt_limit: int, guess_key: str):
     ok, guess_int, err = parse_guess(raw_guess)
 
     low, high, _ = st.session_state.game_settings
-    if ok and not low <= guess_int <= high:
-        ok, err = False, f"Your guess must be between {low} and {high}."
-    elif ok and guess_int in st.session_state.history:
-        ok, err = False, f"You already guessed {guess_int}. Try a different number."
+    if ok:
+        ok, err = validate_guess(guess_int, low, high, st.session_state.history)
 
     # Invalid guesses are refused without using up an attempt.
     if not ok:

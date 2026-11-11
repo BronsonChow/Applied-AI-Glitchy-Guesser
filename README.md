@@ -43,6 +43,29 @@ The game is trying to guess a number using a limited number of guesses. If done 
 
 I applied all that I deemed were a necessary or valuable enough fix. This includes all the fixes that were listed above.
 
+I also made these changes so the game logic is easier to test and change later:
+
+- **Guess validation moved to `logic_utils.py`.** The range check and the repeat-guess check now live in `validate_guess()`, next to `parse_guess()` and `check_guess()`, so they can be tested without running the app.
+- **Scoring rules have names.** The numbers used for scoring are constants at the top of `logic_utils.py`, so you can change the scoring in one place:
+
+  | Constant | Value | Meaning |
+  |---|---|---|
+  | `MAX_WIN_POINTS` | 100 | Points for a first-try win |
+  | `POINTS_LOST_PER_ATTEMPT` | 10 | Points lost for each extra guess |
+  | `MIN_WIN_POINTS` | 10 | Fewest points a win can earn |
+  | `BASELINE_RANGE_SIZE` | 100 | Range size worth 1x points (1–100) |
+
+- **More tests.** Every function in `logic_utils.py` now has tests (32 in total).
+- **Test results file stays small.** `pytest/test_results.txt` now holds only the latest test run instead of every run. Earlier results are kept in git history.
+
+## 🗺️ Architecture
+
+![Architecture diagram](assets/architecture.png)
+
+`app.py` draws the page with Streamlit and keeps the game state in `st.session_state`. All game rules live in `logic_utils.py`, which `tests/test_game_logic.py` tests. `conftest.py` writes each test run's results to `pytest/test_results.txt`.
+
+The diagram source is in [diagrams/architecture.mmd](diagrams/architecture.mmd). You can paste it into [mermaid.live](https://mermaid.live) to edit it.
+
 ## 📸 Demo Walkthrough
 
 Describe your fixed game in numbered steps so a reader can follow along without watching a video:
@@ -76,10 +99,26 @@ Describe your fixed game in numbered steps so a reader can follow along without 
 ## 🧪 Test Results
 
 ```
-# Paste your pytest output here, e.g.:
-# pytest tests/
-# ========================= X passed in 0.XXs =========================
+$ python -m pytest tests/
+============================= test session starts =============================
+platform win32 -- Python 3.14.3, pytest-9.1.1, pluggy-1.6.0
+collected 32 items
+
+tests\test_game_logic.py ................................                [100%]
+
+============================= 32 passed in 0.07s ==============================
 ```
+
+| Function | Tests |
+|---|---|
+| `get_range_for_difficulty` | 6 |
+| `is_float` | 2 |
+| `parse_guess` | 7 |
+| `validate_guess` | 8 |
+| `check_guess` | 3 |
+| `update_score` | 6 |
+
+Each run's full results, one line per test, are written to [pytest/test_results.txt](pytest/test_results.txt).
 
 ## 🚀 Stretch Features
 

@@ -1,7 +1,8 @@
 """Pytest configuration for this project.
 
-Records the outcome of every test run to pytest/test_results.txt so there is a
-running history of what passed and failed over time. No extra flags needed --
+Writes the outcome of the latest test run to pytest/test_results.txt,
+replacing the previous contents. Commit the file alongside code changes to
+record outcomes; git history keeps the earlier runs. No extra flags needed --
 it happens on any `pytest` invocation.
 """
 
@@ -110,7 +111,9 @@ def pytest_sessionfinish(session, exitstatus):
     lines.append("Result: {} (exit status {})".format(summary, int(exitstatus)))
     lines.append("")
 
-    with open(RESULTS_FILE, "a", encoding="utf-8") as handle:
+    # Overwrite rather than append: the file holds only the latest run, so it
+    # stays small. Earlier outcomes are kept in git history.
+    with open(RESULTS_FILE, "w", encoding="utf-8") as handle:
         handle.write("\n".join(lines) + "\n")
 
     _records.clear()
