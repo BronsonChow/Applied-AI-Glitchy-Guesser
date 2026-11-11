@@ -25,6 +25,8 @@ It wrote the code, ran away, and now the game is unplayable.
 
 ## 📝 Document Your Experience
 
+My full write-up of the project is in [docs/reflection.md](docs/reflection.md).
+
 - [ ] Describe the game's purpose.
 
 The game is trying to guess a number using a limited number of guesses. If done correctly, it is near 100% to always guess the correct number.
@@ -58,15 +60,15 @@ I also made these changes so the game logic is easier to test and change later:
 
 - **Locked difficulties and a Custom mode.** Easy, Normal and Hard now have a fixed range and number of attempts. The new **Custom** difficulty lets you choose your own, and scores according to how close your settings are to the three presets (see step 2 of the walkthrough).
 - **More tests.** Every function in `logic_utils.py` now has tests (51 in total).
-- **Test results file stays small.** `pytest/test_results.txt` now holds only the latest test run instead of every run. Earlier results are kept in git history.
+- **Test results file stays small.** `test-results/test_results.txt` now holds only the latest test run instead of every run. Earlier results are kept in git history.
 
 ## 🗺️ Architecture
 
-![Architecture diagram](assets/architecture.png)
+![Architecture diagram](docs/assets/architecture.png)
 
-`app.py` draws the page with Streamlit and keeps the game state in `st.session_state`. All game rules live in `logic_utils.py`, which `tests/test_game_logic.py` tests. `conftest.py` writes each test run's results to `pytest/test_results.txt`.
+`app.py` draws the page with Streamlit and keeps the game state in `st.session_state`. All game rules live in `logic_utils.py`, which `tests/test_game_logic.py` tests. `tests/conftest.py` writes each test run's results to `test-results/test_results.txt`.
 
-The diagram source is in [diagrams/architecture.mmd](diagrams/architecture.mmd). You can paste it into [mermaid.live](https://mermaid.live) to edit it.
+The diagram source is in [docs/diagrams/architecture.mmd](docs/diagrams/architecture.mmd). You can paste it into [mermaid.live](https://mermaid.live) to edit it.
 
 ## 📸 Demo Walkthrough
 
@@ -132,8 +134,10 @@ tests\test_game_logic.py ............................................... [ 92%]
 | `score_multiplier` | 13 |
 | `closest_difficulty` | 4 |
 
-Each run's full results, one line per test, are written to [pytest/test_results.txt](pytest/test_results.txt).
+Each run's full results, one line per test, are written to [test-results/test_results.txt](test-results/test_results.txt).
 
 ## 🚀 Stretch Features
+
+The log of AI interactions for stretch features is in [docs/ai_interactions.md](docs/ai_interactions.md).
 
 - [ ] [If you choose to complete Challenge 4, describe the Enhanced UI changes here — a screenshot is optional]

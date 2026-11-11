@@ -1,7 +1,7 @@
 ==============================================================================
-Test run: 2026-11-10 20:18:04
-Target:   pytest tests/
-Versions: python 3.14.3 | pytest 9.1.1
+Test run: 2026-11-10 22:53:24
+Target:   pytest -q
+Versions: python 3.14.8 | pytest 9.1.1
 ------------------------------------------------------------------------------
 PASSED  tests/test_game_logic.py::test_range_easy                                             0.000s
 PASSED  tests/test_game_logic.py::test_range_normal                                           0.000s
@@ -49,7 +49,7 @@ PASSED  tests/test_game_logic.py::test_custom_never_snaps_to_a_preset_multiplier
 PASSED  tests/test_game_logic.py::test_custom_never_snaps_to_a_preset_multiplier[1000-1]      0.000s
 PASSED  tests/test_game_logic.py::test_trivial_custom_is_worth_less_than_easy                 0.000s
 PASSED  tests/test_game_logic.py::test_fewer_attempts_never_lowers_multiplier                 0.000s
-PASSED  tests/test_game_logic.py::test_wider_range_never_lowers_multiplier                    0.002s
+PASSED  tests/test_game_logic.py::test_wider_range_never_lowers_multiplier                    0.001s
 PASSED  tests/test_game_logic.py::test_preset_settings_are_closest_to_themselves[Easy]        0.000s
 PASSED  tests/test_game_logic.py::test_preset_settings_are_closest_to_themselves[Normal]      0.000s
 PASSED  tests/test_game_logic.py::test_preset_settings_are_closest_to_themselves[Hard]        0.000s

@@ -1,6 +1,6 @@
 """Pytest configuration for this project.
 
-Writes the outcome of the latest test run to pytest/test_results.txt,
+Writes the outcome of the latest test run to test-results/test_results.txt,
 replacing the previous contents. Commit the file alongside code changes to
 record outcomes; git history keeps the earlier runs. No extra flags needed --
 it happens on any `pytest` invocation.
@@ -12,8 +12,8 @@ from datetime import datetime
 
 import pytest
 
-PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
-RESULTS_DIR = os.path.join(PROJECT_ROOT, "pytest")
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+RESULTS_DIR = os.path.join(PROJECT_ROOT, "test-results")
 RESULTS_FILE = os.path.join(RESULTS_DIR, "test_results.txt")
 
 LINE_WIDTH = 78
