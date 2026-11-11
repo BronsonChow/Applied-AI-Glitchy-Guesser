@@ -1,5 +1,5 @@
 ==============================================================================
-Test run: 2026-11-10 20:01:11
+Test run: 2026-11-10 20:18:04
 Target:   pytest tests/
 Versions: python 3.14.3 | pytest 9.1.1
 ------------------------------------------------------------------------------
@@ -29,12 +29,31 @@ PASSED  tests/test_game_logic.py::test_validate_rejects_duplicate_guess         
 PASSED  tests/test_game_logic.py::test_validate_respects_custom_range                         0.000s
 PASSED  tests/test_game_logic.py::test_validate_allows_new_guess_with_history                 0.000s
 PASSED  tests/test_game_logic.py::test_validate_out_of_range_takes_priority_over_duplicate    0.000s
-PASSED  tests/test_game_logic.py::test_first_try_win_on_normal_range                          0.000s
+PASSED  tests/test_game_logic.py::test_first_try_win_on_normal                                0.000s
 PASSED  tests/test_game_logic.py::test_later_win_earns_fewer_points                           0.000s
 PASSED  tests/test_game_logic.py::test_win_points_never_drop_below_minimum                    0.000s
 PASSED  tests/test_game_logic.py::test_wrong_guess_does_not_change_score                      0.000s
 PASSED  tests/test_game_logic.py::test_late_win_beats_a_loss                                  0.000s
-PASSED  tests/test_game_logic.py::test_wider_range_is_worth_more                              0.000s
+PASSED  tests/test_game_logic.py::test_multiplier_scales_win_points                           0.000s
+PASSED  tests/test_game_logic.py::test_attempts_per_difficulty                                0.000s
+PASSED  tests/test_game_logic.py::test_custom_defaults_to_normal_settings                     0.000s
+PASSED  tests/test_game_logic.py::test_preset_gets_its_own_multiplier[Easy]                   0.000s
+PASSED  tests/test_game_logic.py::test_preset_gets_its_own_multiplier[Normal]                 0.000s
+PASSED  tests/test_game_logic.py::test_preset_gets_its_own_multiplier[Hard]                   0.000s
+PASSED  tests/test_game_logic.py::test_harder_presets_are_worth_more                          0.000s
+PASSED  tests/test_game_logic.py::test_custom_between_normal_and_hard                         0.000s
+PASSED  tests/test_game_logic.py::test_custom_harder_than_hard_keeps_rising                   0.000s
+PASSED  tests/test_game_logic.py::test_custom_never_snaps_to_a_preset_multiplier[150-6]       0.000s
+PASSED  tests/test_game_logic.py::test_custom_never_snaps_to_a_preset_multiplier[20-7]        0.000s
+PASSED  tests/test_game_logic.py::test_custom_never_snaps_to_a_preset_multiplier[2-20]        0.000s
+PASSED  tests/test_game_logic.py::test_custom_never_snaps_to_a_preset_multiplier[1000-1]      0.000s
+PASSED  tests/test_game_logic.py::test_trivial_custom_is_worth_less_than_easy                 0.000s
+PASSED  tests/test_game_logic.py::test_fewer_attempts_never_lowers_multiplier                 0.000s
+PASSED  tests/test_game_logic.py::test_wider_range_never_lowers_multiplier                    0.002s
+PASSED  tests/test_game_logic.py::test_preset_settings_are_closest_to_themselves[Easy]        0.000s
+PASSED  tests/test_game_logic.py::test_preset_settings_are_closest_to_themselves[Normal]      0.000s
+PASSED  tests/test_game_logic.py::test_preset_settings_are_closest_to_themselves[Hard]        0.000s
+PASSED  tests/test_game_logic.py::test_closest_difficulty_for_custom_settings                 0.000s
 ------------------------------------------------------------------------------
-Result: 32 passed (exit status 0)
+Result: 51 passed (exit status 0)
 

@@ -3,11 +3,12 @@ classDiagram
 
     class app {
         <<StreamlitPage>>
-        +attempt_limit_map: dict
+        +difficulty_options: list
         +difficulty: str
         +low: int
         +high: int
         +attempt_limit: int
+        +multiplier: float
         +guess_key: str
         +reset_game(low, high, attempt_limit) None
         +start_new_game(low, high, attempt_limit, guess_key) None
@@ -19,13 +20,20 @@ classDiagram
         +MAX_WIN_POINTS: int = 100
         +POINTS_LOST_PER_ATTEMPT: int = 10
         +MIN_WIN_POINTS: int = 10
-        +BASELINE_RANGE_SIZE: int = 100
+        +DIFFICULTY_SETTINGS: dict
+        +CUSTOM_DIFFICULTY: str = Custom
+        +DEFAULT_DIFFICULTY: str = Normal
         +get_range_for_difficulty(difficulty) tuple
+        +get_attempts_for_difficulty(difficulty) int
+        +difficulty_rating(range_size, attempt_limit) float
+        +score_multiplier(range_size, attempt_limit) float
+        +closest_difficulty(range_size, attempt_limit) str
+        -_preset_anchors() list
         +is_float(raw) bool
         +parse_guess(raw) tuple
         +validate_guess(guess, low, high, history) tuple
         +check_guess(guess, secret) tuple
-        +update_score(current_score, outcome, attempt_number, range_size) int
+        +update_score(current_score, outcome, attempt_number, multiplier) int
     }
 
     class SessionState {
@@ -40,9 +48,9 @@ classDiagram
         +show_hint: bool
         +new_game_started: bool
         +settings_changed: bool
-        +range_min_DIFFICULTY: int
-        +range_max_DIFFICULTY: int
-        +attempt_limit_DIFFICULTY: int
+        +range_min_Custom: int
+        +range_max_Custom: int
+        +attempt_limit_Custom: int
         +guess_input_DIFFICULTY: str
     }
 
@@ -58,11 +66,14 @@ classDiagram
     class test_game_logic {
         <<tests>>
         +get_range_for_difficulty: 6 tests
+        +get_attempts_for_difficulty: 2 tests
         +is_float: 2 tests
-        +check_guess: 3 tests
         +parse_guess: 7 tests
         +validate_guess: 8 tests
+        +check_guess: 3 tests
         +update_score: 6 tests
+        +score_multiplier: 13 tests
+        +closest_difficulty: 4 tests
     }
 
     class conftest {
@@ -85,5 +96,6 @@ classDiagram
     conftest ..> test_game_logic : observes test reports
     conftest ..> test_results_txt : writes latest run summary
 
-    note for SessionState "status is playing, won or lost. DIFFICULTY is Easy, Normal or Hard"
+    note for SessionState "status is playing, won or lost. DIFFICULTY is Easy, Normal, Hard or Custom. Only Custom stores editable range and attempts"
+    note for logic_utils "Easy, Normal, Hard are locked at 0.5x, 1.0x, 1.5x. Custom gets its own multiplier from difficulty_rating"
     note for app "Debug panel shown only with query param debug=true"

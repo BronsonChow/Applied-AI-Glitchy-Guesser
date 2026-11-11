@@ -53,9 +53,11 @@ I also made these changes so the game logic is easier to test and change later:
   | `MAX_WIN_POINTS` | 100 | Points for a first-try win |
   | `POINTS_LOST_PER_ATTEMPT` | 10 | Points lost for each extra guess |
   | `MIN_WIN_POINTS` | 10 | Fewest points a win can earn |
-  | `BASELINE_RANGE_SIZE` | 100 | Range size worth 1x points (1–100) |
 
-- **More tests.** Every function in `logic_utils.py` now has tests (32 in total).
+  Each difficulty's range, attempts and score multiplier are in `DIFFICULTY_SETTINGS` in the same file.
+
+- **Locked difficulties and a Custom mode.** Easy, Normal and Hard now have a fixed range and number of attempts. The new **Custom** difficulty lets you choose your own, and scores according to how close your settings are to the three presets (see step 2 of the walkthrough).
+- **More tests.** Every function in `logic_utils.py` now has tests (51 in total).
 - **Test results file stays small.** `pytest/test_results.txt` now holds only the latest test run instead of every run. Earlier results are kept in git history.
 
 ## 🗺️ Architecture
@@ -71,15 +73,23 @@ The diagram source is in [diagrams/architecture.mmd](diagrams/architecture.mmd).
 Describe your fixed game in numbered steps so a reader can follow along without watching a video:
 
 1. **Start the game.** Run `python -m streamlit run app.py`. The game opens in your browser at `http://localhost:8501`.
-2. **Pick a difficulty** in the sidebar. Each one sets a default range and number of attempts:
+2. **Pick a difficulty** in the sidebar. Easy, Normal and Hard have a fixed range and number of attempts, which you can see but not change:
 
-   | Difficulty | Range | Attempts |
-   |---|---|---|
-   | Easy | 1–20 | 10 |
-   | Normal | 1–100 | 8 |
-   | Hard | 1–200 | 5 |
+   | Difficulty | Range | Attempts | Score multiplier |
+   |---|---|---|---|
+   | Easy | 1–20 | 10 | 0.50x |
+   | Normal | 1–100 | 8 | 1.00x |
+   | Hard | 1–200 | 5 | 1.50x |
+   | Custom | you choose | you choose | depends on your settings |
 
-   You can also type your own **Min**, **Max** (up to 1000) and **Attempts allowed** (1 to 20). Changing any setting starts a new game, clears the guess box and shows "New game started."
+   **Custom** lets you type your own **Min**, **Max** (up to 1000) and **Attempts allowed** (1 to 20). It starts from Normal's settings. Custom gets its own multiplier, calculated from how hard your settings are compared with the three presets. It is never rounded to a preset's multiplier:
+   - The game rates difficulty as *guesses a perfect player needs* (about log2 of the range size) divided by *attempts allowed*.
+   - If your rating falls between two presets, your multiplier falls between theirs. For example, 1–150 with 6 attempts is between Normal and Hard and earns 1.27x.
+   - Settings harder than Hard keep earning more, with no cap. For example, 1–1000 with 3 attempts earns 2.78x.
+   - Settings easier than Easy earn less than 0.50x, so a 1–2 range with 20 attempts is worth almost nothing (0.06x).
+   - The sidebar shows your multiplier and which preset your difficulty is most similar to, as a guide only.
+
+   Changing difficulty or any Custom setting starts a new game, clears the guess box and shows "New game started."
 3. **Make a guess.** Type a whole number and press **Enter** or click **Submit Guess 🚀**. These guesses are rejected with a message and *don't* use up an attempt:
    - an empty guess, or one with only spaces
    - text, like `abc`
@@ -88,11 +98,11 @@ Describe your fixed game in numbered steps so a reader can follow along without 
    - a number you've already guessed
 4. **Follow the hints.** After each wrong guess the game says **📉 Go LOWER!** or **📈 Go HIGHER!**, and the "Attempts left" counter goes down by one. Every guess so far is listed in the **Your guesses** box. Untick **Show hint** to play without hints.
 5. **Win.** Guess the secret number to get balloons and a message like "🎉 Correct! You won! The secret was 57. Final score: 90". You still see this message with hints turned off.
-   - A first-try win scores 100 on 1–100. Each extra guess costs 10 points, down to a minimum of 10.
-   - Wider ranges are worth more: a first-try win scores 65 on 1–20, 115 on 1–200 and 150 on 1–1000.
+   - A first-try win is worth 100 points. Each extra guess costs 10 points, down to a minimum of 10.
+   - Those points are multiplied by the difficulty's multiplier: a first-try win scores 50 on Easy, 100 on Normal and 150 on Hard.
 6. **Or lose.** If you run out of attempts, the game shows the secret number and you score 0. A win always scores more than a loss.
 7. **Play again.** Click **New Game 🔁** for a new secret number. Your attempts and score reset and the guess box is cleared.
-8. **(Optional) Peek at the secret.** Add `?debug=true` to the address, e.g. `http://localhost:8501/?debug=true`, to show the **Developer Debug Info** panel. It shows the secret number, attempts, score, difficulty and guess history.
+8. **(Optional) Peek at the secret.** Add `?debug=true` to the address, e.g. `http://localhost:8501/?debug=true`, to show the **Developer Debug Info** panel. It shows the secret number, attempts, score, difficulty, score multiplier and guess history.
 
 **Screenshot** *(optional)*: <!-- Insert a screenshot of your fixed, winning game here -->
 
@@ -102,11 +112,12 @@ Describe your fixed game in numbered steps so a reader can follow along without 
 $ python -m pytest tests/
 ============================= test session starts =============================
 platform win32 -- Python 3.14.3, pytest-9.1.1, pluggy-1.6.0
-collected 32 items
+collected 51 items
 
-tests\test_game_logic.py ................................                [100%]
+tests\test_game_logic.py ............................................... [ 92%]
+....                                                                     [100%]
 
-============================= 32 passed in 0.07s ==============================
+============================= 51 passed in 0.09s ==============================
 ```
 
 | Function | Tests |
@@ -117,6 +128,9 @@ tests\test_game_logic.py ................................                [100%]
 | `validate_guess` | 8 |
 | `check_guess` | 3 |
 | `update_score` | 6 |
+| `get_attempts_for_difficulty` (and Custom defaults) | 2 |
+| `score_multiplier` | 13 |
+| `closest_difficulty` | 4 |
 
 Each run's full results, one line per test, are written to [pytest/test_results.txt](pytest/test_results.txt).
 

@@ -3,9 +3,15 @@ import streamlit as st
 
 #FIX: game logic lives in logic_utils.py
 from logic_utils import (
+    CUSTOM_DIFFICULTY,
+    DEFAULT_DIFFICULTY,
+    DIFFICULTY_SETTINGS,
     check_guess,
+    closest_difficulty,
+    get_attempts_for_difficulty,
     get_range_for_difficulty,
     parse_guess,
+    score_multiplier,
     update_score,
     validate_guess,
 )
@@ -40,7 +46,7 @@ def submit_guess(attempt_limit: int, guess_key: str):
     raw_guess = st.session_state.get(guess_key, "")
     ok, guess_int, err = parse_guess(raw_guess)
 
-    low, high, _ = st.session_state.game_settings
+    low, high, game_attempt_limit = st.session_state.game_settings
     if ok:
         ok, err = validate_guess(guess_int, low, high, st.session_state.history)
 
@@ -68,7 +74,7 @@ def submit_guess(attempt_limit: int, guess_key: str):
         current_score=st.session_state.score,
         outcome=outcome,
         attempt_number=st.session_state.attempts,
-        range_size=high - low + 1,
+        multiplier=score_multiplier(high - low + 1, game_attempt_limit),
     )
 
     if outcome == "Win":
@@ -97,61 +103,80 @@ def submit_guess(attempt_limit: int, guess_key: str):
 
 st.set_page_config(page_title="Glitchy Guesser", page_icon="🎮")
 
-st.title("🎮 Game Glitch Investigator")
+st.title("🎮 Glitchy Guesser")
 st.caption("An AI-generated guessing game. Something is off.")
 
 st.sidebar.header("Settings")
 
+difficulty_options = [*DIFFICULTY_SETTINGS, CUSTOM_DIFFICULTY]
 difficulty = st.sidebar.selectbox(
     "Difficulty",
-    ["Easy", "Normal", "Hard"],
-    index=1,
+    difficulty_options,
+    index=difficulty_options.index(DEFAULT_DIFFICULTY),
 )
 
-#FIX: easier difficulties allow more attempts
-attempt_limit_map = {
-    "Easy": 10,
-    "Normal": 8,
-    "Hard": 5,
-}
+#FIX: preset difficulties lock their range and attempts; only Custom is editable
+if difficulty == CUSTOM_DIFFICULTY:
+    # Custom starts from Normal's settings and remembers the player's edits.
+    default_min, default_max = get_range_for_difficulty(DEFAULT_DIFFICULTY)
+    current_min = st.session_state.get("range_min_Custom", default_min)
+    current_max = st.session_state.get("range_max_Custom", default_max)
 
-# Keyed per difficulty so switching difficulty restores that difficulty's default range.
-min_key = f"range_min_{difficulty}"
-max_key = f"range_max_{difficulty}"
-default_min, default_max = get_range_for_difficulty(difficulty)
-current_min = st.session_state.get(min_key, default_min)
-current_max = st.session_state.get(max_key, default_max)
+    # Each field's limit follows the other field, so min always stays below max.
+    # value= is passed explicitly because Streamlit checks it against the limits.
+    st.sidebar.markdown("**Range**")
+    min_col, max_col = st.sidebar.columns(2)
+    with min_col:
+        low = st.number_input(
+            f"Min (up to {current_max - 1})",
+            value=current_min,
+            max_value=current_max - 1,
+            step=1,
+            key="range_min_Custom",
+        )
+    with max_col:
+        high = st.number_input(
+            f"Max ({current_min + 1} to 1000)",
+            value=current_max,
+            min_value=current_min + 1,
+            max_value=1000,
+            step=1,
+            key="range_max_Custom",
+        )
 
-# Each field's limit follows the other field, so min always stays below max.
-# value= is passed explicitly because Streamlit checks it against the limits.
-st.sidebar.markdown("**Range**")
-min_col, max_col = st.sidebar.columns(2)
-with min_col:
-    low = st.number_input(
-        f"Min (up to {current_max - 1})",
-        value=current_min,
-        max_value=current_max - 1,
+    attempt_limit = st.sidebar.number_input(
+        "Attempts allowed (1 to 20)",
+        min_value=1,
+        max_value=20,
+        value=get_attempts_for_difficulty(DEFAULT_DIFFICULTY),
         step=1,
-        key=min_key,
+        key="attempt_limit_Custom",
     )
-with max_col:
-    high = st.number_input(
-        f"Max ({current_min + 1} to 1000)",
-        value=current_max,
-        min_value=current_min + 1,
-        max_value=1000,
-        step=1,
-        key=max_key,
-    )
+else:
+    # Shown as disabled inputs so the locked values are visible but not editable.
+    low, high = get_range_for_difficulty(difficulty)
+    attempt_limit = get_attempts_for_difficulty(difficulty)
 
-attempt_limit = st.sidebar.number_input(
-    "Attempts allowed (1 to 20)",
-    min_value=1,
-    max_value=20,
-    value=attempt_limit_map[difficulty],
-    step=1,
-    key=f"attempt_limit_{difficulty}",
-)
+    st.sidebar.markdown("**Range**")
+    min_col, max_col = st.sidebar.columns(2)
+    with min_col:
+        st.number_input("Min", value=low, disabled=True)
+    with max_col:
+        st.number_input("Max", value=high, disabled=True)
+    st.sidebar.number_input("Attempts allowed", value=attempt_limit, disabled=True)
+    st.sidebar.caption("Choose Custom to set your own range and attempts.")
+
+multiplier = score_multiplier(high - low + 1, attempt_limit)
+if difficulty == CUSTOM_DIFFICULTY:
+    closest = closest_difficulty(high - low + 1, attempt_limit)
+    # Custom scores with its own multiplier; the closest preset is just a guide.
+    st.sidebar.markdown(f"**Score multiplier:** {multiplier:.2f}x")
+    st.sidebar.caption(
+        f"Calculated from your range and attempts. "
+        f"Difficulty is most similar to {closest}."
+    )
+else:
+    st.sidebar.markdown(f"**Score multiplier:** {multiplier:.2f}x")
 
 guess_key = f"guess_input_{difficulty}"
 
@@ -185,6 +210,7 @@ if st.query_params.get("debug") == "true":
         st.write("Attempts:", st.session_state.attempts)
         st.write("Score:", st.session_state.score)
         st.write("Difficulty:", difficulty)
+        st.write("Score multiplier:", round(multiplier, 3))
         st.write("History:", st.session_state.history)
 
 with st.container(border=True):
