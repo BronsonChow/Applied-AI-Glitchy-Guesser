@@ -108,6 +108,10 @@ def parse_guess(raw: str):
     if raw.strip() == "":
         return False, None, "Enter a guess."
 
+    #FIX: int() accepts digit separators ("1_0" is 10), which isn't a number a player means
+    if "_" in raw:
+        return False, None, "That is not a number."
+
     try:
         value = int(raw)
     except ValueError:

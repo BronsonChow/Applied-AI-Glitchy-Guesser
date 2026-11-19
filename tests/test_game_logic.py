@@ -97,6 +97,10 @@ def test_parse_rejects_decimals():
     assert not ok and value is None
     assert "Decimals" in err
 
+def test_parse_rejects_digit_separators():
+    # int() would read "1_0" as 10.
+    assert parse_guess("1_0") == (False, None, "That is not a number.")
+
 def test_parse_rejects_text():
     assert parse_guess("abc") == (False, None, "That is not a number.")
 

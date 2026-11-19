@@ -1,0 +1,20 @@
+# Your own edge cases for: python edge_cases.py --file tests/edge_cases.csv
+#
+# Only input and expected are needed. Blank low/high use the Normal range
+# (1..100). history is numbers already guessed, separated by spaces.
+# expected is one of: reject, accept, win, higher, lower
+# (win/higher/lower need a secret). Put quotes around input that has commas
+# or spaces at the ends, or starts with #.
+input,expected,low,high,history,secret,note
+42,accept,,,,,plain guess
+"  7  ",accept,,,,,spaces are trimmed
+-3,reject,,,,,below Normal range
+-3,accept,-10,10,,,negative Custom range
+1000,accept,1,1000,,,largest Custom max
+1001,reject,1,1000,,,just past Custom max
+12,reject,,,5 12 30,,already guessed
+"#5",reject,,,,,starts with # but quoted
+3.14,reject,,,,,decimal
+20,higher,1,20,,21,impossible secret above range still hints
+1,win,1,2,,1,smallest Custom range
+2,lower,1,2,,1,smallest Custom range
