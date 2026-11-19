@@ -73,12 +73,35 @@ classDiagram
         +get_range_for_difficulty: 6 tests
         +get_attempts_for_difficulty: 2 tests
         +is_float: 2 tests
-        +parse_guess: 7 tests
+        +parse_guess: 8 tests
         +validate_guess: 8 tests
         +check_guess: 3 tests
         +update_score: 6 tests
         +score_multiplier: 13 tests
         +closest_difficulty: 4 tests
+    }
+
+    class edge_cases {
+        <<CLI>>
+        +Case
+        +Result
+        +play_guess(raw, low, high, history, secret) tuple
+        +guess_case(category, name, raw, expected, ...) Case
+        +builtin_cases() list
+        +load_csv_cases(path, default_low, default_high) list
+        +run_case(case) Result
+        +interactive(low, high, save_path) list
+        +main(argv) int
+    }
+
+    class test_edge_cases {
+        <<tests>>
+        +edge_cases: 11 tests
+    }
+
+    class edge_cases_csv {
+        <<csvFile>>
+        +input, expected, low, high, history, secret, note
     }
 
     class conftest {
@@ -98,10 +121,15 @@ classDiagram
     app ..> Streamlit : renders UI
     Streamlit *-- SessionState : persists across reruns
     test_game_logic ..> logic_utils : tests
+    edge_cases ..> logic_utils : checks rules against edge cases
+    edge_cases ..> edge_cases_csv : reads cases with --file
+    test_edge_cases ..> edge_cases : tests
     conftest ..> test_game_logic : observes test reports
+    conftest ..> test_edge_cases : observes test reports
     conftest ..> test_results_txt : writes latest run summary
 
     note for SessionState "status is playing, won or lost. DIFFICULTY is Easy, Normal, Hard or Custom. Only Custom stores editable range and attempts"
     note for logic_utils "Easy, Normal, Hard are locked at 0.5x, 1.0x, 1.5x. Custom gets its own multiplier from difficulty_rating"
     note for app "Debug panel shown only with query param debug=true"
+    note for edge_cases "Prints a pass rate. Expected results: reject, accept, win, higher, lower"
 ```

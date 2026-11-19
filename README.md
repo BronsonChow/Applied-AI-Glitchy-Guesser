@@ -37,7 +37,7 @@ The project is split into four parts:
 - **[tests/](tests/)** holds the pytest tests. [tests/conftest.py](tests/conftest.py) writes each run's results to [test-results/test_results.txt](test-results/test_results.txt).
 - **[edge_cases.py](edge_cases.py)** is a command-line tool that runs `logic_utils.py` against edge cases and prints a pass rate. You can add your own cases.
 
-The diagram shows the first three parts; the edge-case checker was added after it was drawn. The diagram source is in [docs/diagrams/architecture.mmd](docs/diagrams/architecture.mmd). You can paste it into [mermaid.live](https://mermaid.live) to edit it.
+The diagram source is in [docs/diagrams/architecture.mmd](docs/diagrams/architecture.mmd). You can paste it into [mermaid.live](https://mermaid.live) to edit it.
 
 ## 🛠️ Setup Instructions
 
