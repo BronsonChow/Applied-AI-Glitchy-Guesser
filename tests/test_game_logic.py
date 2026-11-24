@@ -2,12 +2,15 @@ import pytest
 
 from logic_utils import (
     DIFFICULTY_SETTINGS,
+    FULL_VALUE_RANGE_SIZE,
+    RANGE_HALVING_STEP,
     check_guess,
     closest_difficulty,
     get_attempts_for_difficulty,
     get_range_for_difficulty,
     is_float,
     parse_guess,
+    range_penalty,
     update_score,
     score_multiplier,
     validate_guess,
@@ -212,6 +215,16 @@ def test_custom_never_snaps_to_a_preset_multiplier(range_size, attempts):
 def test_trivial_custom_is_worth_less_than_easy():
     # A 1-2 range with 20 attempts can't be used to farm points.
     assert score_multiplier(2, 20) < DIFFICULTY_SETTINGS["Easy"]["multiplier"]
+
+def test_tiny_range_with_few_attempts_is_worth_almost_nothing():
+    # 99-100 with 2 attempts is a guaranteed win, so it earns ~nothing.
+    assert update_score(0, "Win", attempt_number=1, multiplier=score_multiplier(2, 2)) <= 1
+
+def test_narrower_ranges_lose_value_exponentially():
+    # Each RANGE_HALVING_STEP narrower halves the multiplier (same attempts).
+    assert range_penalty(FULL_VALUE_RANGE_SIZE) == 1.0
+    assert range_penalty(FULL_VALUE_RANGE_SIZE - RANGE_HALVING_STEP) == pytest.approx(0.5)
+    assert range_penalty(FULL_VALUE_RANGE_SIZE - 2 * RANGE_HALVING_STEP) == pytest.approx(0.25)
 
 def test_fewer_attempts_never_lowers_multiplier():
     multipliers = [score_multiplier(100, attempts) for attempts in range(20, 0, -1)]

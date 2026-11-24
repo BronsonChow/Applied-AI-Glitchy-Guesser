@@ -19,6 +19,13 @@ DIFFICULTY_SETTINGS = {
 CUSTOM_DIFFICULTY = "Custom"
 DEFAULT_DIFFICULTY = "Normal"
 
+# Ranges narrower than the smallest preset range are close to free wins, so
+# the multiplier halves for every RANGE_HALVING_STEP numbers below it.
+FULL_VALUE_RANGE_SIZE = min(
+    s["range"][1] - s["range"][0] + 1 for s in DIFFICULTY_SETTINGS.values()
+)
+RANGE_HALVING_STEP = 3
+
 
 #FIX: hard difficulty is harder than normal
 def get_range_for_difficulty(difficulty: str):
@@ -64,6 +71,9 @@ def score_multiplier(range_size: int, attempt_limit: int):
     interpolated; harder than Hard it keeps rising along the Normal-to-Hard
     slope; easier than Easy it falls toward 0, so trivial custom games
     can't farm points.
+
+    Ranges narrower than every preset's are then penalized exponentially
+    (see range_penalty), since few attempts can't make a tiny range hard.
     """
     rating = difficulty_rating(range_size, attempt_limit)
     anchors = [(0.0, 0.0)] + _preset_anchors()
@@ -72,7 +82,15 @@ def score_multiplier(range_size: int, attempt_limit: int):
     for (r0, m0), (r1, m1) in zip(anchors, anchors[1:]):
         if rating <= r1:
             break
-    return m0 + (m1 - m0) * (rating - r0) / (r1 - r0)
+    base = m0 + (m1 - m0) * (rating - r0) / (r1 - r0)
+    return base * range_penalty(range_size)
+
+
+def range_penalty(range_size: int):
+    """1.0 for ranges at least as wide as the smallest preset; below that,
+    halves every RANGE_HALVING_STEP numbers narrower the range gets."""
+    missing = max(FULL_VALUE_RANGE_SIZE - range_size, 0)
+    return 0.5 ** (missing / RANGE_HALVING_STEP)
 
 
 def closest_difficulty(range_size: int, attempt_limit: int):
